@@ -1,6 +1,6 @@
 #ruby 2.0.0p451 (2014-02-24 revision 45167)
 #energies files must contain time on left column, energy on right, separated by space
-#change paths on lines 5, 51-60, 69
+#change paths on lines 5, 51-60, 70
 
 text = File.open('dyn_energies.txt').read
 text = text.to_s
