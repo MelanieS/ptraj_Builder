@@ -2,7 +2,7 @@
 #energies files must contain time on left column, energy on right, separated by space
 #change paths on lines 5, 51-60, 69
 
-text = File.open('wy_12_60_dyn_energies.txt').read
+text = File.open('dyn_energies.txt').read
 text = text.to_s
 array = text.split("\n")
 
@@ -47,16 +47,17 @@ def file_checker(file_path)
   return $grep_arr
 end
 
-results = file_checker('files/WY_12_60_dyn1.out')
-results = file_checker('files/WY_12_60_dyn2.out')
-results = file_checker('files/WY_12_60_dyn3.out')
-results = file_checker('files/WY_12_60_dyn4.out')
-results = file_checker('files/WY_12_60_dyn5.out')
-results = file_checker('files/WY_12_60_dyn6.out')
-results = file_checker('files/WY_12_60_dyn7.out')
-results = file_checker('files/WY_12_60_dyn8.out')
-results = file_checker('files/WY_12_60_dyn9.out')
-results = file_checker('files/WY_12_60_dyn10.out')
+#This is really repetitive. Must find another way.
+results = file_checker('files/dyn1.out')
+results = file_checker('files/dyn2.out')
+results = file_checker('files/dyn3.out')
+results = file_checker('files/dyn4.out')
+results = file_checker('files/dyn5.out')
+results = file_checker('files/dyn6.out')
+results = file_checker('files/dyn7.out')
+results = file_checker('files/dyn8.out')
+results = file_checker('files/dyn9.out')
+results = file_checker('files/dyn10.out')
 
 def answer()
   $grep_arr.each do |b|
