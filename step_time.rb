@@ -30,7 +30,7 @@ def file_checker(file_path, time_arr, new_str_arr)
     puts " "
     count = 1
     to_del = []
-    $file_path = file_path
+    $stub = file_path.split("_")[0]
     time_arr.each do |i|
         #this gives us the size of the project so a status can be seen with "count"
         size = time_arr.size
@@ -84,17 +84,20 @@ def answer(new_str_arr)
     end
 end
 
+def stub(file_path)
+end
+
 #runs the program
 Dir.glob('*out') do |file_path|
   results = file_checker(file_path, time_arr, new_str_arr)
 end
 
 #grabs file prefix and uses it to name files
-stub = $file_path.split("_")[0]
+#stub = $file_path.split("_")[0]
 #writes to new file
 new = File.new("ptraj.in", "w")
 #puts trajin strings from the file_checker and answer methods into the file
 new.puts answer(new_str_arr)
-new.puts 
-new.puts "trajout #{stub}.pdb pdb"
+new.puts
+new.puts "trajout #{$stub}.pdb pdb"
 new.close
