@@ -24,13 +24,13 @@ end
 #this inserts a whitespace in front of each time allowing for grepping
 time_arr.map! {|x| " " + x}
 
-$grep_arr = []
+new_str_arr = []
 
-def file_checker(file_path, time_arr)
+def file_checker(file_path, time_arr, new_str_arr)
     puts " "
     count = 1
     to_del = []
-    $this = file_path
+    $file_path = file_path
     time_arr.each do |i|
         #this gives us the size of the project so a status can be seen with "count"
         size = time_arr.size
@@ -65,7 +65,7 @@ def file_checker(file_path, time_arr)
                 math_str = math_str/500
                 #creates a string for output
                 new_str = "trajin #{mdcrd_path} #{math_str} #{math_str}"
-                $grep_arr.push(new_str)
+                new_str_arr.push(new_str)
                 #inserts the time used here into a new array for maintenance/speed 
                 to_del.push(i)
             end
@@ -75,27 +75,26 @@ def file_checker(file_path, time_arr)
     to_del.each do |f|
         time_arr.delete(f)
     end
-    to_del = []
+        to_del = []
 end
 
 #iterates through the array of new strings
-def answer()
-    $grep_arr.each do |b|
+def answer(new_str_arr)
+    new_str_arr.each do |b|
     end
 end
-#puts $grep_arr
 
 #runs the program
 Dir.glob('*out') do |file_path|
-  results = file_checker(file_path, time_arr)
+  results = file_checker(file_path, time_arr, new_str_arr)
 end
 
 #grabs file prefix and uses it to name files
-stub = $this.split("_")[0]
+stub = $file_path.split("_")[0]
 #writes to new file
 new = File.new("ptraj.in", "w")
 #puts trajin strings from the file_checker and answer methods into the file
-new.puts answer
+new.puts answer(new_str_arr)
 new.puts 
 new.puts "trajout #{stub}.pdb pdb"
 new.close
