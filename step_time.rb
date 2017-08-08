@@ -1,72 +1,101 @@
-#ruby 2.0.0p451 (2014-02-24 revision 45167)
+#ruby 2.2.1p85 (2015-02-26 revision 49769)
 #energies files must contain time on left column, energy on right, separated by space
-#change paths on lines 5, 51-60, 70
+#change paths on line 73
 
-text = File.open('dyn_energies.txt').read
+#This opens the energies file, and splits it into an array at newlines
+energies = Dir.glob('*energies.txt')
+energies = energies.pop
+text = File.open(energies).read
 text = text.to_s
 array = text.split("\n")
 
 #creates time_arr which only holds time (same indices as main array)
-$time_arr =[]
+time_arr =[]
 
+#takes input data from energies.txt and pulls only the time at which energy occurs
+#retains the whitespace char at the end of each time as well
 array.each do |i|
-  white = i.index(" ")
-  white = white.to_i
-  time_num = white - 1
-  time_num = time_num.to_i
-  time = i[0..time_num]
-  $time_arr.push(time)
+    whitespace = i.index(" ")
+    whitespace = whitespace.to_i
+    time = i[0..whitespace]
+    time_arr.push(time)
 end
 
-#puts blank space before and after time to clean up "grep"
-$time_arr.map! {|x| " " + x + " "}
-$cleaning_time = $time_arr
+#this inserts a whitespace in front of each time allowing for grepping
+time_arr.map! {|x| " " + x}
 
 $grep_arr = []
 
-def file_checker(file_path)
-    $grep_arr.push(file_path)
-  puts " "
-  count = 1
-  $time_arr.each do |i|
-    size = $time_arr.size
-    puts "Grepping time #{count} of #{size} in #{file_path}"
-    grepped = File.open(file_path).read
-    grepped = grepped.to_s
-    grepped_array = grepped.split("\n")
-    count = count + 1
-    
-    grepped_array.each do |e|
-      if e.include? i
-        length = e.length
-        clean_str = e[0..43]
-        $grep_arr.push(clean_str)
-      end
+def file_checker(file_path, time_arr)
+    puts " "
+    count = 1
+    to_del = []
+    $this = file_path
+    time_arr.each do |i|
+        #this gives us the size of the project so a status can be seen with "count"
+        size = time_arr.size
+        puts "Grepping time #{count} of #{size} in #{file_path}"
+        #opens an .out file, pulls data, and splits into array on newline
+        grepped = File.open(file_path).read.to_s
+        grepped_array = grepped.split("\n")
+        count = count + 1
+        
+        grepped_array.each do |e|    
+            #arrays look roughly like this
+            #NSTEP =  5180000   TIME(PS) =    5215.000  TEMP(K) =   309.60  PRESS =     0.0
+            #Etot   =        43.0108  EKtot   =        43.3737  EPtot      =        -0.3629
+            #BOND   =        17.4371  ANGLE   =        13.2322  DIHED      =        32.3214
+            #1-4 NB =        17.1057  1-4 EEL =        72.6723  VDWAALS    =        -9.9034
+            #EELEC  =      -143.2282  EHBOND  =         0.0000  RESTRAINT  =         0.0000
+            if e.include? i
+                puts "Item found: #{i}"
+                #if item found in .out file, a path is made for it, substituting the current
+                #.out filename for .mdcrd. For example, if found in dyn1.out, the corresponding
+                #.mdcrd path is dyn1.mdcrd
+                mdcrd_path = file_path.gsub 'out', 'mdcrd'
+                #grabs the step associated with the time
+                #unclear on how the code works
+                #example line:
+                #NSTEP =  2765000   TIME(PS) =  202800.000  TEMP(K) =   411.39  PRESS =     0.0
+                #time = 202800.000
+                #associated step is 2765000
+                clean_str = e.scan(/\d+/).first
+                math_str = clean_str.to_i
+                #Divides the step by 500 to account for ... why?
+                math_str = math_str/500
+                #creates a string for output
+                new_str = "trajin #{mdcrd_path} #{math_str} #{math_str}"
+                $grep_arr.push(new_str)
+                #inserts the time used here into a new array for maintenance/speed 
+                to_del.push(i)
+            end
+        end
     end
-  end
-  return $grep_arr
+    #this removes a "used" time so it is not searched for after instance is found
+    to_del.each do |f|
+        time_arr.delete(f)
+    end
+    to_del = []
 end
 
-#This is really repetitive. Must find another way.
-results = file_checker('files/dyn1.out')
-results = file_checker('files/dyn2.out')
-results = file_checker('files/dyn3.out')
-results = file_checker('files/dyn4.out')
-results = file_checker('files/dyn5.out')
-results = file_checker('files/dyn6.out')
-results = file_checker('files/dyn7.out')
-results = file_checker('files/dyn8.out')
-results = file_checker('files/dyn9.out')
-results = file_checker('files/dyn10.out')
-
+#iterates through the array of new strings
 def answer()
-  $grep_arr.each do |b|
-  end
+    $grep_arr.each do |b|
+    end
+end
+#puts $grep_arr
+
+#runs the program
+Dir.glob('*out') do |file_path|
+  results = file_checker(file_path, time_arr)
 end
 
-puts answer
-
+#grabs file prefix and uses it to name files
+stub = $this.split("_")[0]
 #writes to new file
-new = File.new("time_step_wy_12_60_dyn.txt", "w")
+new = File.new("ptraj.in", "w")
+#puts trajin strings from the file_checker and answer methods into the file
 new.puts answer
+new.puts 
+new.puts "trajout #{stub}.pdb pdb"
 new.close
